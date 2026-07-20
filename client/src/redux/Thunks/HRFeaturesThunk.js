@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { apiService } from "../apis/apiService";
+import { apiService } from "../apis/APIService";
 import { NoticeEndPoints, LeaveEndPoints, AttendanceEndPoints, RecruitmentEndPoints, InterviewEndPoints, RequestEndPoints, SalaryEndPoints, HREndPointsList, HREndPoints } from "../apis/APIsEndpoints";
 import {
   getDemoAttendances,
