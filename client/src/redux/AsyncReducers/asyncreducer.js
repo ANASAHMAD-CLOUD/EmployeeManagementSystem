@@ -5,29 +5,31 @@ export const AsyncReducer = (builder, thunk) => {
             state.error.content = null;
         })
         .addCase(thunk.fulfilled, (state, action) => {
+            const payload = action.payload || {};
             state.isLoading = false;
             state.error.status = false;
-            state.data = action.payload;
-            if (action.payload.resetpassword) {
+            state.data = payload;
+            if (payload.resetpassword) {
                 state.isAuthenticated = false;
-                state.isResetPasswords = action.payload.success
+                state.isResetPasswords = payload.success
             }
             else {
-                state.isAuthenticated = action.payload.success;
+                state.isAuthenticated = payload.success;
             }
         })
         .addCase(thunk.rejected, (state, action) => {
-            if (action.payload.gologin) {
+            const payload = action.payload || { message: action.error?.message || "Request failed", gologin: false };
+            if (payload.gologin) {
                 state.isLoading = false;
                 state.error.status = false;
-                state.error.message = action.payload.message
-                state.error.content = action.payload
+                state.error.message = payload.message
+                state.error.content = payload
             }
             else {
                 state.isLoading = false;
                 state.error.status = true;
-                state.error.message = action.payload.message
-                state.error.content = action.payload
+                state.error.message = payload.message
+                state.error.content = payload
             }
         });
 };
@@ -39,24 +41,27 @@ export const HRAsyncReducer = (builder, thunk) => {
             state.error.content = null;
         })
         .addCase(thunk.fulfilled, (state, action) => {
-            if (action.payload.type == "signup") {
+            const payload = action.payload || {};
+            if (payload.type == "signup") {
                 state.isSignUp = true
                 state.isLoading = false;
                 state.isAuthenticated = true
                 state.isAuthourized = true
-                state.isVerifiedEmailAvailable = true
+                state.isVerified = true
+                state.isVerifiedEmailAvailable = false
                 state.error.status = false;
-                state.data = action.payload;
+                state.data = payload;
             }
-            if ((action.payload.type == "checkHR") || (action.payload.type == "HRLogin") || (action.payload.type == "HRforgotpassword")) {
+            if ((payload.type == "checkHR") || (payload.type == "HRLogin") || (payload.type == "HRforgotpassword")) {
                 state.isSignUp = true
                 state.isLoading = false;
                 state.isAuthenticated = true
                 state.isAuthourized = true
+                state.isVerified = true
                 state.error.status = false;
-                state.data = action.payload;
+                state.data = payload;
             }
-            if (action.payload.type == "HRverifyemail") {
+            if (payload.type == "HRverifyemail") {
                 state.isSignUp = true
                 state.isLoading = false;
                 state.isAuthenticated = true
@@ -64,13 +69,13 @@ export const HRAsyncReducer = (builder, thunk) => {
                 state.isVerifiedEmailAvailable = false
                 state.isVerified = true
                 state.error.status = false;
-                state.data = action.payload;
+                state.data = payload;
             }
-            if (action.payload.type == "HRcodeavailable") {
+            if (payload.type == "HRcodeavailable") {
                 state.isSignUp = true
                 state.isLoading = false;
                 state.isAuthenticated = true
-                if (action.payload.alreadyverified) {
+                if (payload.alreadyverified) {
                     state.isVerified = true
                 }
                 else {
@@ -78,55 +83,56 @@ export const HRAsyncReducer = (builder, thunk) => {
                 }
                 state.isVerifiedEmailAvailable = true
                 state.error.status = false;
-                state.data = action.payload;
+                state.data = payload;
             }
-            if (action.payload.resetpassword) {
+            if (payload.resetpassword) {
                 state.isSignUp = true
                 state.isLoading = false;
                 state.isAuthenticated = false;
                 state.isResetPassword = true
                 state.error.status = false;
-                state.data = action.payload;
+                state.data = payload;
             }
-            if (action.payload.type == "HRResendVerifyEmail") {
+            if (payload.type == "HRResendVerifyEmail") {
                 state.isSignUp = true
                 state.isLoading = false;
                 state.isAuthenticated = true
                 state.isVerifiedEmailAvailable = true
                 state.error.status = false;
-                state.data = action.payload;
+                state.data = payload;
             }
         })
         .addCase(thunk.rejected, (state, action) => {
-            if (action.payload.type == "signup") {
+            const payload = action.payload || { message: action.error?.message || "Request failed" };
+            if (payload.type == "signup") {
                 state.isSignUp = false
                 state.isLoading = false;
                 state.error.status = true;
-                state.error.message = action.payload.message
-                state.error.content = action.payload
+                state.error.message = payload.message
+                state.error.content = payload
             }
-            if (action.payload.type == "HRcodeavailable") {
+            if (payload.type == "HRcodeavailable") {
                 // state.isSignUp = true
                 state.isLoading = false;
                 // state.isAuthenticated = true
                 state.isVerified = false
                 state.isVerifiedEmailAvailable = false
                 state.error.status = false;
-                state.error.content = action.payload
+                state.error.content = payload
             }
-            if (action.payload.gologin) {
+            if (payload.gologin) {
                 state.isSignUp = false
                 state.isLoading = false;
                 state.isAuthenticated = false
                 state.error.status = false;
-                state.error.message = action.payload.message
-                state.error.content = action.payload
+                state.error.message = payload.message
+                state.error.content = payload
             }
             else {
                 state.isLoading = false;
                 state.error.status = true;
-                state.error.message = action.payload.message
-                state.error.content = action.payload
+                state.error.message = payload.message
+                state.error.content = payload
             }
         });
 }
@@ -210,11 +216,10 @@ export const HRDepartmentPageAsyncReducer = (builder, thunk) => {
             state.success.message = null
             state.success.content = null
         }
-        else if (action.payload.type === "CreateDepartment" || 
-            action.payload.type === "DepartmentDelete" || 
-            action.payload.type === "DepartmentEMUpdate" || 
-            action.payload.type === "RemoveEmployeeDE") 
-            {
+        else if (action.payload.type === "CreateDepartment" ||
+            action.payload.type === "DepartmentDelete" ||
+            action.payload.type === "DepartmentEMUpdate" ||
+            action.payload.type === "RemoveEmployeeDE") {
             state.isLoading = false;
             state.error.status = false;
             state.error.message = null

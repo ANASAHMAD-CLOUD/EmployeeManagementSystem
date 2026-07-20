@@ -2,8 +2,7 @@ import { HumanResources } from "../models/HR.model.js"
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import { GenerateJwtTokenAndSetCookiesHR } from "../utils/generatejwttokenandsetcookies.js"
-import { SendVerificationEmail, SendWelcomeEmail, SendForgotPasswordEmail, SendResetPasswordConfimation } from "../mailtrap/emails.js"
-import { GenerateVerificationToken } from "../utils/generateverificationtoken.js"
+import { SendWelcomeEmail, SendForgotPasswordEmail, SendResetPasswordConfimation } from "../mailtrap/emails.js"
 import { Organization } from "../models/Organization.model.js"
 
 export const HandleHRSignup = async (req, res) => {
@@ -36,7 +35,6 @@ export const HandleHRSignup = async (req, res) => {
             })
 
             const hashedpassword = await bcrypt.hash(password, 10)
-            const verificationcode = GenerateVerificationToken(6)
 
             const newHR = await HumanResources.create({
                 firstname,
@@ -46,22 +44,21 @@ export const HandleHRSignup = async (req, res) => {
                 contactnumber,
                 role: "HR-Admin",
                 organizationID: newOrganization._id,
-                verificationtoken: verificationcode,
-                verificationtokenexpires: Date.now() + 5 * 60 * 1000
+                isverified: true,
+                verificationtoken: undefined,
+                verificationtokenexpires: undefined
             })
 
             newOrganization.HRs.push(newHR._id)
             await newOrganization.save()
 
             GenerateJwtTokenAndSetCookiesHR(res, newHR._id, newHR.role, newOrganization._id)
-            const VerificationEmailStatus = await SendVerificationEmail(email, verificationcode)
-            return res.status(201).json({ success: true, message: "Organization Created Successfully & HR Registered Successfully", VerificationEmailStatus: VerificationEmailStatus, type: "signup", HRid: newHR._id })
+            return res.status(201).json({ success: true, message: "Organization Created Successfully & HR Registered Successfully", type: "signup", HRid: newHR._id })
         }
 
         if (organization && !HR) {
 
             const hashedpassword = await bcrypt.hash(password, 10)
-            const verificationcode = GenerateVerificationToken(6)
 
             const newHR = await HumanResources.create({
                 firstname,
@@ -71,16 +68,16 @@ export const HandleHRSignup = async (req, res) => {
                 contactnumber,
                 role: "HR-Admin",
                 organizationID: organization._id,
-                verificationtoken: verificationcode,
-                verificationtokenexpires: Date.now() + 5 * 60 * 1000
+                isverified: true,
+                verificationtoken: undefined,
+                verificationtokenexpires: undefined
             })
 
             organization.HRs.push(newHR._id)
             await organization.save()
 
             GenerateJwtTokenAndSetCookiesHR(res, newHR._id, newHR.role, organization._id)
-            const VerificationEmailStatus = await SendVerificationEmail(email, verificationcode)
-            return res.status(201).json({ success: true, message: "HR Registered Successfully", type: "signup", VerificationEmailStatus: VerificationEmailStatus, HRid: newHR._id })
+            return res.status(201).json({ success: true, message: "HR Registered Successfully", type: "signup", HRid: newHR._id })
         }
 
     } catch (error) {
@@ -224,8 +221,9 @@ export const HandleHRResetverifyEmail = async (req, res) => {
         }
 
         const verificationcode = GenerateVerificationToken(6)
+        console.log(`[DEVELOPMENT] Resent HR Verification OTP for ${email}: ${verificationcode}`);
         HR.verificationtoken = verificationcode
-        HR.verificationtokenexpires = Date.now() + 5 * 60 * 1000
+        HR.verificationtokenexpires = Date.now() + 24 * 60 * 60 * 1000
 
         await HR.save()
 

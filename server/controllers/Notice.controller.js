@@ -6,10 +6,11 @@ import { Notice } from "../models/Notice.model.js"
 export const HandleCreateNotice = async (req, res) => {
     try {
         const { title, content, audience, departmentID, employeeID, HRID } = req.body
+        const noticeAuthorId = HRID || req.HRid
 
         if (audience === "Department-Specific") {
 
-            if (!title || !content || !audience || !departmentID || !HRID) {
+            if (!title || !content || !audience || !departmentID || !noticeAuthorId) {
                 return res.status(404).json({ success: false, message: "All fields must be provided" })
             }
 
@@ -36,7 +37,7 @@ export const HandleCreateNotice = async (req, res) => {
                 content: content,
                 audience: audience,
                 department: departmentID,
-                createdby: HRID,
+                createdby: noticeAuthorId,
                 organizationID: req.ORGID
             })
 
@@ -47,7 +48,7 @@ export const HandleCreateNotice = async (req, res) => {
         }
 
         if (audience === "Employee-Specific") {
-            if (!title || !content || !audience || !employeeID || !HRID) {
+            if (!title || !content || !audience || !employeeID || !noticeAuthorId) {
                 return res.status(404).json({ success: false, message: "All fields must be provided" })
             }
 
@@ -74,7 +75,7 @@ export const HandleCreateNotice = async (req, res) => {
                 content: content,
                 audience: audience,
                 employee: employeeID,
-                createdby: HRID,
+                createdby: noticeAuthorId,
                 organizationID: req.ORGID
             })
 
@@ -90,6 +91,14 @@ export const HandleCreateNotice = async (req, res) => {
     }
 }
 
+export const HandleEmployeeNotices = async (req, res) => {
+    try {
+        const notices = await Notice.find({ organizationID: req.ORGID, employee: req.EMid }).sort({ createdAt: -1 }).populate("createdby", "firstname lastname")
+        return res.status(200).json({ success: true, message: "Employee notices retrieved successfully", data: notices })
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "Internal Server Error", error: error })
+    }
+}
 
 export const HandleAllNotice = async (req, res) => {
     try {

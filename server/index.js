@@ -24,21 +24,26 @@ import cors from "cors"
 
 dotenv.config()
 const app = express();
-app.use(bodyParser.json())
+const PORT = process.env.PORT || 5050;
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+app.use(bodyParser.json({ limit: '10mb' }))
 app.use(cookieParser())
 
+const corsOptions = {
+  origin: CLIENT_URL,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
 
-app.use(cors({
-  origin: process.env.CLIENT_URL, // Adjust this to match your front-end origin exactly
-  credentials: true, // This is optional and depends on whether you’re using cookies
-}));
-// app.options('*', cors())
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
-app.use("/api/auth/employee", EmployeeAuthRouter) 
+app.use("/api/auth/employee", EmployeeAuthRouter)
 
 app.use("/api/auth/HR", HRAuthrouter)
 
-app.use("/api/v1/dashboard", DashboardRouter) 
+app.use("/api/v1/dashboard", DashboardRouter)
 
 app.use("/api/v1/employee", EmployeeRouter)
 
@@ -65,6 +70,15 @@ app.use("/api/v1/generate-request", GenerateRequestRouter)
 app.use("/api/v1/corporate-calendar", CorporateCalendarRouter)
 
 app.use("/api/v1/balance", BalanceRouter)
+
+app.use((err, req, res, next) => {
+  if (err?.type === 'entity.parse.failed') {
+    return res.status(400).json({ success: false, message: 'Invalid JSON payload' })
+  }
+
+  console.error('Unhandled server error:', err)
+  return res.status(500).json({ success: false, message: 'Internal server error' })
+})
 
 app.listen(process.env.PORT, async () => {
   await ConnectDB()

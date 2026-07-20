@@ -30,6 +30,7 @@ export const HandleEmplyoeeSignup = async (req, res) => {
 
             const hashedPassword = await bcrypt.hash(password, 10)
             const verificationcode = GenerateVerificationToken(6)
+            console.log(`[DEVELOPMENT] Generated Employee Verification OTP for ${email}: ${verificationcode}`);
 
             const newEmployee = await Employee.create({
                 firstname: firstname,
@@ -101,6 +102,7 @@ export const HandleResetEmplyoeeVerifyEmail = async (req, res) => {
         }
 
         const verificationcode = GenerateVerificationToken(6)
+        console.log(`[DEVELOPMENT] Resent Employee Verification OTP for ${email}: ${verificationcode}`);
         employee.verificationtoken = verificationcode
         employee.verificationtokenexpires = Date.now() + 5 * 60 * 1000
         await employee.save()
