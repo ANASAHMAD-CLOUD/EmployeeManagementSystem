@@ -7,7 +7,7 @@ import {
   DeleteFeatureItem,
 } from "../../../redux/Thunks/HRFeaturesThunk";
 import { HREmployeesPageEndPoints } from "../../../redux/apis/APIsEndpoints";
-import { apiService } from "../../../redux/apis/apiService";
+import { apiService } from '../../../redux/apis/APIService';
 
 export const SalaryFeature = ({
   title = "Salaries",

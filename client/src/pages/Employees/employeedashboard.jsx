@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { HandlePostEmployees } from "../../redux/Thunks/EmployeeThunk.js";
 import { logoutEmployee } from "../../redux/Slices/EmployeeSlice.js";
-import { apiService } from "../../redux/apis/apiService";
+import { apiService } from "../../redux/apis/APIService";
 import { NoticeEndPoints } from "../../redux/apis/APIsEndpoints";
 import { getDemoEmployeeNotices, isDemoHRSession } from "../../utils/demoData";
 

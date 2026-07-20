@@ -14,7 +14,7 @@ import {
   UpdateFeatureItem,
   DeleteFeatureItem,
 } from "../../../redux/Thunks/HRFeaturesThunk";
-import { apiService } from "../../../redux/apis/apiService";
+import { apiService } from "../../../redux/apis/APIService";
 import {
   HRDepartmentPageEndPoints,
   HREmployeesPageEndPoints,
