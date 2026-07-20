@@ -1,6 +1,8 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv'
+import path from 'path';
+import { fileURLToPath } from 'url';
 import EmployeeAuthRouter from './routes/EmployeeAuth.route.js'
 import HRAuthrouter from './routes/HRAuth.route.js'
 import DashboardRouter from './routes/Dashbaord.route.js'
@@ -22,7 +24,11 @@ import cookieParser from 'cookie-parser';
 import cors from "cors"
 
 
-dotenv.config()
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+
 const app = express();
 const PORT = process.env.PORT || 5050;
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
