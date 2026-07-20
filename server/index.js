@@ -31,19 +31,60 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 5050;
-const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
+  process.env.ALLOWED_ORIGINS,
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+]
+  .flatMap((value) => value ? value.split(",").map((item) => item.trim()).filter(Boolean) : [])
+  .filter(Boolean);
+
 app.use(bodyParser.json({ limit: '10mb' }))
 app.use(cookieParser())
 
 const corsOptions = {
-  origin: CLIENT_URL,
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+app.use(cors({
+  ...corsOptions,
+  origin: (origin, callback) => {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const isAllowedOrigin = allowedOrigins.includes(origin) || origin.includes("onrender.com") || origin.includes("localhost") || origin.includes("127.0.0.1");
+
+    if (isAllowedOrigin) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"), false);
+  },
+}));
+app.options('*', cors({
+  ...corsOptions,
+  origin: (origin, callback) => {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const isAllowedOrigin = allowedOrigins.includes(origin) || origin.includes("onrender.com") || origin.includes("localhost") || origin.includes("127.0.0.1");
+
+    if (isAllowedOrigin) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"), false);
+  },
+}));
 
 app.use("/api/auth/employee", EmployeeAuthRouter)
 
