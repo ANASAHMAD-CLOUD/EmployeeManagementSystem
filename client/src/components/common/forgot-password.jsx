@@ -1,6 +1,7 @@
 import { ErrorPopup } from "./error-popup"
 import { useSelector } from "react-redux"
 import { Link } from "react-router-dom"
+import forgotPasswordImage from '../../assets/forgotpassword.png';
 
 export const ForgotPassowrd = ({ handleforgotpasswordsubmit, handlesforgotpasswordform, targetState, redirectpath }) => {
     const EmplyoeeState = useSelector((state) => state.employeereducer)
@@ -12,7 +13,7 @@ export const ForgotPassowrd = ({ handleforgotpasswordsubmit, handlesforgotpasswo
                 <div className="sm:mx-auto sm:w-full sm:max-w-sm lg:mx-10">
                     <img
                         alt="Your Company"
-                        src="../../src/assets/forgotpassword.png"
+                        src={forgotPasswordImage}
                         className="mx-auto h-auto w-auto"
                     />
                 </div>
